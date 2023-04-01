@@ -12,15 +12,16 @@ try{
 	String store[] = new String[10];
 	String[] arr;
 	int coreNum = 0;
+	int jobID = 0;
 
 	dout.write(("HELO\n").getBytes());
 	dout.flush(); 
 	 
-	String str=(String)dis.readLine(); 
+	String str=(String)dis.readLine();
 	System.out.println(str);
 	  
 	dout.write(("AUTH ryan\n").getBytes());
-	dout.flush();  
+	dout.flush();
 	
 	
 	str=dis.readLine(); 
@@ -37,15 +38,10 @@ try{
 	System.out.println(str);
 	System.out.println("Start While");
 	
-	String[] jobs = str.split(" ", 10);
 	
 	dout.write(("GETS All\n").getBytes());
 	dout.flush();
 	
-	//while(str!="NONE"){
-	
-
-
 	
 	str=dis.readLine(); 
 	System.out.println(str);
@@ -79,25 +75,35 @@ try{
 	dout.flush();
 	
 	
-	dout.write(("SCHD " + jobs[2] + " " + store[0] + " " + store[1] + "\n").getBytes());
+	dout.write(("SCHD " + jobID + " " + store[0] + " " + store[1] + "\n").getBytes());
 	dout.flush();
 	
 	
 	dout.write(("OK\n").getBytes());
 	dout.flush();
 	
-		str=dis.readLine(); 
-	System.out.println(str);
-	
-	dout.write(("REDY\n").getBytes());
-	dout.flush();
-	
-		dout.write(("SCHD " + jobs[2] + " " + store[0] + " " + store[1] + "\n").getBytes());
-	dout.flush();
-	
 	str=dis.readLine(); 
 	System.out.println(str);
-	System.out.println("loop end");
+	
+	//while(str!="NONE"){
+		
+		jobID++;
+	
+		dout.write(("REDY\n").getBytes());
+		dout.flush();
+	
+		dout.write(("OK\n").getBytes());
+		dout.flush();
+	
+		dout.write(("SCHD " + jobID + " " + store[0] + " " + store[1] + "\n").getBytes());
+		dout.flush();
+	
+	
+		dout.write(("OK\n").getBytes());
+		dout.flush();
+	
+		str=dis.readLine(); 
+		System.out.println(str);
 	
  	//}
 	
