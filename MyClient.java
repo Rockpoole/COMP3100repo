@@ -10,9 +10,11 @@ try{
 	boolean getsComplete = false; 
 	int topCores = 0;
 	String store[] = new String[10];
-	String[] arr;
+	String[] storeTemp;
+	int numServers = 0;
 	int coreNum = 0;
 	int jobID = 0;
+	int serverID=0;
 
 	dout.write(("HELO\n").getBytes());
 	dout.flush(); 
@@ -53,29 +55,30 @@ try{
 	int nRecs = Integer.parseInt(String.valueOf(str.charAt(5)));
 
 
-
 	for (int i=0; i<nRecs; i++){
 		str = dis.readLine();
 		System.out.println(str);
 		
-        	arr = str.split(" ", 9);
-		coreNum = Integer.parseInt(String.valueOf(arr[4]));
+        	storeTemp = str.split(" ", 9);
+		coreNum = Integer.parseInt(String.valueOf(storeTemp[4]));
     	
     		if(topCores < coreNum){
     			topCores=coreNum;
-    			store = arr;
+    			store = storeTemp;
+    			numServers = Integer.parseInt(String.valueOf(store[1]));
 		}
 	}
 	
-	}
 	
-		getsComplete=true;
+	}
+	System.out.println("No. Servers = " + numServers);
+	getsComplete=true;
 	
 	dout.write(("OK\n").getBytes());
 	dout.flush();
 	
 	
-	dout.write(("SCHD " + jobID + " " + store[0] + " " + store[1] + "\n").getBytes());
+	dout.write(("SCHD " + jobID + " " + store[0] + " " + serverID + "\n").getBytes());
 	dout.flush();
 	
 	
@@ -88,14 +91,17 @@ try{
 	//while(str!="NONE"){
 		
 		jobID++;
+		serverID++;
+		if(serverID>numServers) serverID=0;
 	
 		dout.write(("REDY\n").getBytes());
 		dout.flush();
 	
 		dout.write(("OK\n").getBytes());
 		dout.flush();
-	
-		dout.write(("SCHD " + jobID + " " + store[0] + " " + store[1] + "\n").getBytes());
+		
+		System.out.println("SCHD" + jobID + store[0] + store[1] );
+		dout.write(("SCHD " + jobID + " " + store[0] + " " + serverID + "\n").getBytes());
 		dout.flush();
 	
 	
