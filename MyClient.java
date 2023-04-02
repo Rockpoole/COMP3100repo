@@ -92,48 +92,42 @@ try{
 	
 	dout.write(("OK\n").getBytes());
 	dout.flush();
-	String check = "Hello";
-	boolean none = false;
-	boolean scheduled=false;
-	//while(none==false){
-	while(i<10){
-		if(serverID>numServers) serverID=0;
-		
-//		System.out.println("str =" + str);
-//		strcheck = str.split(" ", 10);
-//		check = strcheck[0];
-//		System.out.println(ready);
+	String haha = "";
 
-		if(str.contains("NONE")) none =true;
+		
+	while(!str.contains("NONE")){
+		if(serverID>numServers) serverID=0;
+
+		dout.write(("REDY\n").getBytes());
+		dout.flush();
+
+		
+		haha=dis.readLine(); 
+		System.out.println("haha print = " + haha);
+		
+		dout.write(("OK\n").getBytes());
+		dout.flush();
 		
 		str=dis.readLine(); 
 		System.out.println("str print = " + str);
-		//jobs = str.split(" ",9);
-		//if(jobs[1]==jobID) scheduled = true;
-		//System.out.println("jobs[1] = " + jobs[1]);
 		
-		dout.write(("OK\n").getBytes());
-		dout.flush();
 		
-		dout.write(("REDY\n").getBytes());
-		dout.flush();
-		
-		String a = String.valueOf(jobID);
-		
-		//if(str.contains("JOBN") && str.contains(a)){
-		if(str.contains("JOBN")){
-		System.out.println("SCHD" + jobID + store[0] + store[1] );
-		dout.write(("SCHD " + jobID + " " + store[0] + " " + serverID + "\n").getBytes());
-		dout.flush();
+
+		if(haha.contains("JOBN") && !haha.contains("JCPL")){
+			System.out.println("SCHD" + jobID + store[0] + store[1] );
+			dout.write(("SCHD " + jobID + " " + store[0] + " " + serverID + "\n").getBytes());
+			dout.flush();
 	
-		scheduled=true;
-		jobID++;
-		serverID++;
-		i++;
-		}
-		dout.write(("OK\n").getBytes());
-		dout.flush();
- 	}
+			while(!str.contains("OK")){
+			str=dis.readLine(); 
+			}
+	
+			jobID++;
+			serverID++;
+			i++;
+		} //END IF
+		
+ 	} // END WHILE
 	
 	dout.write(("QUIT\n").getBytes());
 	dout.flush();
