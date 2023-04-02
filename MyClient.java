@@ -3,21 +3,21 @@ import java.net.*;
 public class MyClient {  
 public static void main(String[] args) {  
 try{      
+	// -- Socket Creation -- //
 	Socket s=new Socket("localhost",50000);  
 	BufferedReader dis = new BufferedReader(new InputStreamReader(s.getInputStream()));
 	DataOutputStream dout=new DataOutputStream(s.getOutputStream()); 
 	
-	boolean getsComplete = false; 
-	int topCores = 0;
+	// -- Variables -- //
 	String store[] = new String[10];
-	String jobs[] = new String[10];
 	String[] storeTemp;
-	int numServers = 0;
-	int coreNum = 0;
-	int jobID = 0;
-	int serverID=0;
-	String[] strcheck;
+	int topCores = 0; // Used to identify server with most cores
+	int coreNum = 0; // Used to identify how many cores in each server
+	int numServers = 0; // Finds the total number of most-core servers
+	int serverID=0; // Tells LRR which server to schedule job to
+	int jobID = 0; // Tells LRR which job to schedule
 
+	// -- Handshake -- //
 	dout.write(("HELO\n").getBytes());
 	dout.flush(); 
 	 
@@ -27,22 +27,18 @@ try{
 	dout.write(("AUTH ryan\n").getBytes());
 	dout.flush();
 	
-	
 	str=dis.readLine(); 
 	System.out.println(str);
 	
+	// -- Find Server Information -- //
 	dout.write(("REDY\n").getBytes());
 	dout.flush();
 	
-	
-	
 	str=dis.readLine(); 
 	System.out.println(str);
 	
-	
-	dout.write(("GETS All\n").getBytes());
+	dout.write(("GETS All\n").getBytes()); // Get server data
 	dout.flush();
-	
 	
 	str=dis.readLine(); 
 	System.out.println(str);
@@ -50,85 +46,57 @@ try{
 	dout.write(("OK\n").getBytes());
 	dout.flush();
 	
-	if (getsComplete==false){
-	int nRecs = Integer.parseInt(String.valueOf(str.charAt(5)));
 
+	int nRecs = Integer.parseInt(String.valueOf(str.charAt(5))); // Find Number of Records (Servers)
 
 	for (int i=0; i<nRecs; i++){
 		str = dis.readLine();
 		System.out.println(str);
 		
         	storeTemp = str.split(" ", 9);
-		coreNum = Integer.parseInt(String.valueOf(storeTemp[4]));
+		coreNum = Integer.parseInt(String.valueOf(storeTemp[4])); // Find number of cores in this server type
     	
-    		if(topCores < coreNum){
+    		if(topCores <= coreNum){ // Find Server type with most cores
     			topCores=coreNum;
     			store = storeTemp;
-    			numServers = Integer.parseInt(String.valueOf(store[1]));
+    			numServers = Integer.parseInt(String.valueOf(store[1])); // Find number of servers of the largest type
 		}
 	}
-	
-	
-	}
-	System.out.println("No. Servers = " + numServers);
-	getsComplete=true;
-	
-//	dout.write(("OK\n").getBytes());
-//	dout.flush();
-	
-	
-//	dout.write(("SCHD " + jobID + " " + store[0] + " " + serverID + "\n").getBytes());
-//	dout.flush();
-	
-	
-//	dout.write(("OK\n").getBytes());
-//	dout.flush();
-	
-//	str=dis.readLine(); 
-//	System.out.println(str);
-	int i=0;
-	//while(str!="NONE"){
-	boolean ready=true;
-	
+
 	dout.write(("OK\n").getBytes());
 	dout.flush();
-	String haha = "";
-
-		
-	while(!str.contains("NONE")){
-		if(serverID>numServers) serverID=0;
+	
+	// -- Job Scheduler While Loop -- //
+	while(!str.contains("NONE")){  // WHILE LOOP START
+	
+		if(serverID>numServers) serverID=0; // Reset to Server 0 when last server has been utilised
 
 		dout.write(("REDY\n").getBytes());
 		dout.flush();
-
 		
-		haha=dis.readLine(); 
-		System.out.println("haha print = " + haha);
+		str=dis.readLine(); 
+		System.out.println("str print 1 = " + str);
 		
 		dout.write(("OK\n").getBytes());
 		dout.flush();
 		
 		str=dis.readLine(); 
-		System.out.println("str print = " + str);
-		
-		
+		System.out.println("str print 2 = " + str);
 
-		if(haha.contains("JOBN") && !haha.contains("JCPL")){
-			System.out.println("SCHD" + jobID + store[0] + store[1] );
+		if(str.contains("JOBN") && !str.contains("JCPL")){ //Schedule a job if server sends one (Don't schedule one if server sends a JCPL)
+			System.out.println("Schedule Job " + jobID + " to server " + store[0] + " " + serverID );
 			dout.write(("SCHD " + jobID + " " + store[0] + " " + serverID + "\n").getBytes());
 			dout.flush();
 	
-			while(!str.contains("OK")){
-			str=dis.readLine(); 
-			}
-	
-			jobID++;
-			serverID++;
-			i++;
+			while(!str.contains("OK")) str=dis.readLine(); // Wait until server acknowledges schedule
+			
+			jobID++; // Increment to next job
+			serverID++; // Increment to next server
 		} //END IF
 		
  	} // END WHILE
 	
+		// -- QUIT -- //
 	dout.write(("QUIT\n").getBytes());
 	dout.flush();
 
