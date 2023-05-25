@@ -17,6 +17,7 @@ try{
 	int serverID=0; // Tells LRR which server to schedule job to
 	int jobID = 0; // Tells LRR which job to schedule
 
+
 	// -- Handshake -- //
 	dout.write(("HELO\n").getBytes());
 	dout.flush(); 
@@ -83,7 +84,8 @@ try{
 		str=dis.readLine(); 
 		System.out.println("str print 2 = " + str);
 
-		if(str.contains("JOBN") && !str.contains("JCPL")){ //Schedule a job if server sends one (Don't schedule one if server sends a JCPL)
+
+		if(str.split(" ")[0].equals("JOBN")){ //Schedule a job if server sends one (Don't schedule one if server sends a JCPL)
 			System.out.println("Schedule Job " + jobID + " to server " + store[0] + " " + serverID );
 			dout.write(("SCHD " + jobID + " " + store[0] + " " + serverID + "\n").getBytes());
 			dout.flush();
