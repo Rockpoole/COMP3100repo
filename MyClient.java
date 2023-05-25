@@ -1,21 +1,23 @@
 import java.io.*;  
 import java.net.*;  
+import java.util.arraylist.*;
 public class MyClient {  
 public static void main(String[] args) {  
 try{      
 	// -- Socket Creation -- //
-	Socket s=new Socket("localhost",50000);  
+	Socket mySocket=new Socket("localhost",50000);  
 	BufferedReader dis = new BufferedReader(new InputStreamReader(s.getInputStream()));
 	DataOutputStream dout=new DataOutputStream(s.getOutputStream()); 
 	
 	// -- Variables -- //
 	String store[] = new String[10];
 	String[] storeTemp;
-	int topCores = 0; // Used to identify server with most cores
-	int coreNum = 0; // Used to identify how many cores in each server
-	int numServers = 0; // Finds the total number of most-core servers
+	int core = 0;
+	int memory = 0;
+	int disk = 0;
 	int serverID=0; // Tells LRR which server to schedule job to
 	int jobID = 0; // Tells LRR which job to schedule
+	ArrayList available = new ArrayList();
 
 
 	// -- Handshake -- //
@@ -31,6 +33,9 @@ try{
 	str=dis.readLine(); 
 	System.out.println(str);
 	
+	// -- Job Scheduler While Loop -- //
+	while(!str.contains("NONE")){  // WHILE LOOP START
+	
 	// -- Find Server Information -- //
 	dout.write(("REDY\n").getBytes());
 	dout.flush();
@@ -38,7 +43,7 @@ try{
 	str=dis.readLine(); 
 	System.out.println(str);
 	
-	dout.write(("GETS All\n").getBytes()); // Get server data
+	dout.write(("GETS Avail " + core + " " + memory + " " + disk "\n").getBytes()); // Get server data
 	dout.flush();
 	
 	str=dis.readLine(); 
@@ -67,8 +72,6 @@ try{
 	dout.write(("OK\n").getBytes());
 	dout.flush();
 	
-	// -- Job Scheduler While Loop -- //
-	while(!str.contains("NONE")){  // WHILE LOOP START
 	
 		if(serverID>numServers) serverID=0; // Reset to Server 0 when last server has been utilised
 
@@ -103,7 +106,7 @@ try{
 	dout.flush();
 
 	dout.close();  
-	s.close();  
+	mySocket.close();  
 }catch(Exception e){System.out.println(e);}  
 }  
 } 
