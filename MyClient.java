@@ -1,6 +1,6 @@
 import java.io.*;
 import java.net.*;
-public class MyClient2 {
+public class MyClient {
 public static void main(String[] args) {
 try{
 	// -- Socket Creation -- //
@@ -9,7 +9,7 @@ try{
 	DataOutputStream dout=new DataOutputStream(mySocket.getOutputStream());
 
 	// -- Variables -- //
-	String input = new String();
+	String input = "";
 	String store[] = new String[10];
 	String[] storeTemp;
 	int core = 0;
@@ -29,16 +29,17 @@ try{
 
 	input=dis.readLine();
 
-	// -- Job Scheduler While Loop -- //
-	while(!input.equals("NONE")){  // WHILE LOOP START
+	String jobSpecs[];
 
-		String jobSpecs[] = new String[10];
+	// -- Job Scheduler While Loop -- //
+	while(true){  // WHILE LOOP START -- RUNS UNTIL BREAK IS IMPLEMENTED
 
 		// -- Find Server Information -- //
 		dout.write(("REDY\n").getBytes());
 		dout.flush();
 
 		input=dis.readLine();
+
 		if(input.equals("NONE")) break;
 
 		if(input.split(" ")[0].equals("JOBN")){ // Begin Job Scheduling
@@ -47,7 +48,7 @@ try{
 			core = Integer.parseInt(String.valueOf(jobSpecs[4]));
 			memory = Integer.parseInt(String.valueOf(jobSpecs[5]));
 			disk = Integer.parseInt(String.valueOf(jobSpecs[6]));
-
+			jobID = Integer.parseInt(String.valueOf(jobSpecs[2]));
 
 			dout.write(("GETS Avail " + core + " " + memory + " " + disk + "\n").getBytes()); // Get available server data
 			dout.flush();
@@ -84,20 +85,14 @@ try{
 
 				input=dis.readLine();
 
-				dout.write(("SCHD " + jobID + " " + store[0] + " " + store[1] + "\n").getBytes());
-				dout.flush();
-
-				while(!input.contains("OK")) input=dis.readLine(); // Wait until server acknowledges schedule
-
-				jobID++; // Increment to next job
-
-		} // END If
+					dout.write(("SCHD " + jobSpecs[2] + " " + store[0] + " " + store[1] + "\n").getBytes());
+					dout.flush();
+					while(!input.contains("OK")) input=dis.readLine(); // Wait until server acknowledges schedule
+		}
  	} // END WHILE
 
 		// -- QUIT -- //
 	dout.write(("QUIT\n").getBytes());
-	dout.flush();
-
 	dout.close();
 	mySocket.close();
 }catch(Exception e){System.out.println(e);}
