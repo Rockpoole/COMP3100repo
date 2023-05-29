@@ -5,4 +5,4 @@ rm -rf *.class
 echo "Running Client"
 javac MyClient.java
 
-python3 s2_test.py -n java MyClient -r results/ref_results.json
+python3 ./s2_demo.py "java MyClient" -n -r results/ref_results.json

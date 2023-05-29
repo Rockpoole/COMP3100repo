@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+
 public class MyClient {
 public static void main(String[] args) {
 try{
@@ -10,8 +11,7 @@ try{
 
 	// -- Variables -- //
 	String input = "";
-	String store[] = new String[10];
-	String[] storeTemp;
+	String storeServer[] = new String[10];
 	int core = 0;
 	int memory = 0;
 	int disk = 0;
@@ -32,7 +32,7 @@ try{
 	String jobSpecs[];
 
 	// -- Job Scheduler While Loop -- //
-	while(true){  // WHILE LOOP START -- RUNS UNTIL BREAK IS IMPLEMENTED
+	while(true){  // WHILE LOOP START -- CONTINUES UNTIL A BREAK IS IMPLEMENTED
 
 		// -- Find Server Information -- //
 		dout.write(("REDY\n").getBytes());
@@ -71,13 +71,12 @@ try{
 				int nRecs = Integer.parseInt(String.valueOf(input.charAt(5))); // Find Number of Records (Servers)
 
 				for (int i=0; i<nRecs; i++){
+			  	if(i==0){ // Save first available server
 					input = dis.readLine();
-
-					storeTemp = input.split(" ", 9);
-
-			    		if(i==0){ // Save first available server
-			    			store = storeTemp;
-					}
+			    		storeServer = input.split(" ", 9);
+					i++;
+				}
+					if(nRecs != 1) input=dis.readLine();
 				}
 
 				dout.write(("OK\n").getBytes());
@@ -85,16 +84,21 @@ try{
 
 				input=dis.readLine();
 
-					dout.write(("SCHD " + jobSpecs[2] + " " + store[0] + " " + store[1] + "\n").getBytes());
-					dout.flush();
-					while(!input.contains("OK")) input=dis.readLine(); // Wait until server acknowledges schedule
-		}
+				dout.write(("SCHD " + jobSpecs[2] + " " + storeServer[0] + " " + storeServer[1] + "\n").getBytes());
+				dout.flush();
+				
+				while(!input.contains("OK")) input=dis.readLine(); // Wait until server acknowledges schedule
+
+		} // END SCHEDULING IF STATEMENT
  	} // END WHILE
 
 		// -- QUIT -- //
 	dout.write(("QUIT\n").getBytes());
 	dout.close();
 	mySocket.close();
-}catch(Exception e){System.out.println(e);}
+
+}catch(Exception e){
+	System.out.println(e);
+}
 }
 }
