@@ -10,12 +10,14 @@ try{
 	
 	// -- Variables -- //
 	String store[] = new String[10];
+	String biggest[] = new String[10];
 	String[] storeTemp;
 	int core = 0;
 	int memory = 0;
 	int disk = 0;
 	int jobID = 0; // Tells RR which job to schedule
 	boolean unavailable = false;
+	boolean first = true;
 
 
 	// -- Handshake -- //
@@ -32,13 +34,15 @@ try{
 	System.out.println(str);
 	
 	// -- Job Scheduler While Loop -- //
-	while(!str.contains("NONE")){  // WHILE LOOP START
+	while(!str.equals("NONE")){  // WHILE LOOP START
 	
 	String jobSpecs[] = new String[10];
 	
 	if(unavailable==true){
-		dout.write(("DEQJ GQ\n").getBytes());
-		dout.flush();
+//		dout.write(("LSTQ GQ #\n").getBytes());
+//		dout.flush();
+//		dout.write(("DEQJ GQ 0\n").getBytes());
+//		dout.flush();
 		unavailable=false;
 	}
 	
@@ -47,40 +51,94 @@ try{
 	dout.flush();
 	
 	str=dis.readLine(); 
-	System.out.println(str);
+	System.out.println("First Ready = " + str);
+	if(str.equals("NONE")) break;
+	
+	if(str.split(" ")[0].equals("JCPL")){
+	dout.write(("REDY\n").getBytes());
+	dout.flush();
+	str=dis.readLine(); 
+	System.out.println("JCPL = " + str);
+	}
+	
+	if(!str.split(" ")[0].equals("JCPL")){
 	jobSpecs=str.split(" ", 7);
-		
 	core = Integer.parseInt(String.valueOf(jobSpecs[4]));
 	memory = Integer.parseInt(String.valueOf(jobSpecs[5]));
 	disk = Integer.parseInt(String.valueOf(jobSpecs[6]));
 	
+
+	
 	dout.write(("GETS Avail " + core + " " + memory + " " + disk + "\n").getBytes()); // Get server data
 	dout.flush();
 	
-	str=dis.readLine(); 
-	System.out.println("String split = " + str.split(" ")[1]);
+			System.out.println("After GETS = " + str);
 	
-	// if(str.split(" ")[1].equals("0")) unavailable = true;
+	str=dis.readLine(); 
+	System.out.println("String split = " + str);
 
 	dout.write(("OK\n").getBytes());
 	dout.flush();
 	
-
-	int nRecs = Integer.parseInt(String.valueOf(str.charAt(5))); // Find Number of Records (Servers)
-
-	for (int i=0; i<nRecs; i++){
-		str = dis.readLine();
-		System.out.println(str);
+	
+		if(str.split(" ")[1].equals("0")) {
+		unavailable = true;
+		}
 		
-		storeTemp = str.split(" ", 9);
-    	
-    		if(i==0){ // Save first available server
-    			store = storeTemp;
+	if(str.split(" ")[1].equals("10000")) {
+		unavailable = true;
+		dout.write(("ENQJ GQ\n").getBytes());
+		dout.flush();
+		dout.write(("DEQJ GQ 0\n").getBytes());
+		dout.flush();
+		dout.write(("REDY\n").getBytes());
+		dout.flush();
+		str = dis.readLine();
+		dout.write(("GETS Capable " + core + " " + memory + " " + disk + "\n").getBytes()); // Get server data
+		dout.flush();
+		str=dis.readLine(); 
+	System.out.println("String split capable = " + str);
+
+	dout.write(("OK\n").getBytes());
+	dout.flush();
+		}
+		
+		
+
+		
+		int nRecs = Integer.parseInt(String.valueOf(str.charAt(5))); // Find Number of Records (Servers)
+					System.out.println("nRecs = " + nRecs);
+					if(nRecs>0){
+		for (int i=0; i<nRecs; i++){
+			str = dis.readLine();
+			System.out.println(str);
+			
+			storeTemp = str.split(" ", 9);
+	    	
+	    		if(i==0){ // Save first available server
+	    			store = storeTemp;
+			}
+			if(i==(nRecs-1) & first==true) biggest=storeTemp;
 		}
 	}
+		if(unavailable==true){
+		System.out.println("NA TRUE");
+		 str=dis.readLine(); 
+		System.out.println("na = " + str);
+		dout.write(("OK\n").getBytes());
+		dout.flush();
+		dout.write(("REDY\n").getBytes());
+		dout.flush();
+		
+		str=dis.readLine(); 
+		System.out.println("str print 1 = " + str);
+		
 
-	dout.write(("OK\n").getBytes());
-	dout.flush();
+		}
+
+		dout.write(("OK\n").getBytes());
+		dout.flush();
+
 
 		dout.write(("REDY\n").getBytes());
 		dout.flush();
@@ -104,12 +162,26 @@ try{
 			
 			jobID++; // Increment to next job
 		} //END IF
-	
-		if(unavailable == true){
-			dout.write(("ENGJ GQ\n").getBytes());
+		if(str.split(" ")[0].equals("JOBN") && unavailable==true){ //Schedule a job if server sends one (Don't schedule one if server sends a JCPL)
+			System.out.println("Schedule Job " + jobID + " to server " + biggest[0] + " " + biggest[1]);
+			dout.write(("SCHD " + jobID + " " + biggest[0] + " " + biggest[1] + "\n").getBytes());
 			dout.flush();
-		}
 	
+			while(!str.contains("OK")) str=dis.readLine(); // Wait until server acknowledges schedule
+			
+			jobID++; // Increment to next job
+		} //END IF
+		
+	if(unavailable == true){
+		
+//		str=dis.readLine(); 
+//		System.out.println("post queue = " + str);
+		
+//		dout.write(("OK\n").getBytes());
+//		dout.flush();
+	}
+	}
+	first = false;
  	} // END WHILE
 	
 		// -- QUIT -- //
