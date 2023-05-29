@@ -1,6 +1,6 @@
 import java.io.*;  
 import java.net.*;  
-public class MyClient {  
+public class testCode {  
 public static void main(String[] args) {  
 try{      
 	// -- Socket Creation -- //
